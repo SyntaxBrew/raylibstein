@@ -18,6 +18,7 @@ FetchContent_MakeAvailable(raylib)
 
 add_executable(Liminalstein
     src/main.cpp
+    src/map.cpp
 )
 
 # PRIVATE = only exposes stuff to your files
