@@ -3,6 +3,8 @@
 
 struct RaycastResult {
     float distance;
+    Vector2 direction;
+    bool hit;
     bool is_vertical;
 };
 

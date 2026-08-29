@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 #include <limits>
 #include "map.hpp"
 
@@ -31,6 +32,49 @@ RaycastResult Map::CastRay(Vector2 start_pos, Vector2 dir) {
         side_dist_y = std::ceilf(start_pos.y) - start_pos.y;
     else if (dir.y < 0)
         side_dist_y = start_pos.y - std::floorf(start_pos.y); 
+
+    float delta_dist_x = std::abs(1.0 / dir.x); // angled dist between each vertical line
+    float delta_dist_y = std::abs(1.0 / dir.y); // angled dist between each horizontal line
+
+    // we can increment x, y counters instead of re-calculating cell positions
+    int row = (int) start_pos.x;
+    int col = (int) start_pos.y;
+    int step_x = dir.x == 0 ? 0 : (dir.x > 0 ? 1 : -1); 
+    int step_y = dir.y == 0 ? 0 : (dir.y > 0 ? 1 : -1); 
+
+    float dist_travelled = 0.0f; // running total to the current gridline
+    bool hit = false;
+    bool is_vertical = false;
+
+    while (!hit && InBounds(row, col)) {
+        // choose the closest grid line (what the ray hits first)
+        
+        // vertical hit
+        if (side_dist_x < side_dist_y) { 
+            dist_travelled = side_dist_x;
+            row += step_x;
+            side_dist_x += delta_dist_x;
+            is_vertical = true;
+        
+        // horizontal hit
+        } else {
+            dist_travelled = side_dist_y;
+            col += step_y;
+            side_dist_y += delta_dist_y;
+            is_vertical = false;
+        }
+
+        if (IsSolid(row, col)) {
+            hit = true;
+        }
+    }
+
+    return {
+        dist_travelled,
+        dir,
+        hit,
+        is_vertical
+    };
 }
 
 bool Map::InBounds(int r, int c) {
