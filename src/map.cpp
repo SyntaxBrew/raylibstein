@@ -18,7 +18,7 @@ Map::Map(int rows, int cols) : rows(rows), cols(cols) {
     };
 }
 
-RaycastResult Map::CastRay(Vector2 start_pos, Vector2 dir) {
+RaycastResult Map::CastRay(const Vector2& start_pos, const Vector2& dir) {
     float side_dist_x = inf; // Running total to the next vertical line
     float side_dist_y = inf; // Running total to the next horizontal line
 
@@ -48,7 +48,7 @@ RaycastResult Map::CastRay(Vector2 start_pos, Vector2 dir) {
 
     while (!hit && InBounds(row, col)) {
         // choose the closest grid line (what the ray hits first)
-        
+
         // vertical hit
         if (side_dist_x < side_dist_y) { 
             dist_travelled = side_dist_x;

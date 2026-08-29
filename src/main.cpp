@@ -7,12 +7,24 @@
 int WINDOW_WIDTH = 1280;
 int WINDOW_HEIGHT = 720;
 
+int CELL_SIZE = 64;
+
 float DegreesToRads(float degrees) {
     return degrees * (std::numbers::pi / 180.0f);
 }
 
 Vector2 AngleToVector2(float angle) {
     return {cosf(DegreesToRads(angle)), sinf(DegreesToRads(angle))};
+}
+
+void Render2DMap(Map& map) {
+    for (int r = 0; r < map.rows; r++) {
+        for (int c = 0; c < map.cols; c++) {
+            DrawRectangle(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE, map.IsSolid(r, c) ? WHITE : BLACK);
+            DrawRectangle((c+1) * CELL_SIZE - 1, r * CELL_SIZE, 2, CELL_SIZE, GRAY);
+            DrawRectangle(c * CELL_SIZE, (r+1) * CELL_SIZE - 1, CELL_SIZE, 2, GRAY);
+        }
+    }
 }
 
 int main() {
@@ -26,6 +38,7 @@ int main() {
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
+        Render2DMap(map);
         EndDrawing();
     }
 

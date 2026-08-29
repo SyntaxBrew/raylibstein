@@ -8,7 +8,7 @@ struct RaycastResult {
     bool is_vertical;
 };
 
-class Map {
+struct Map {
     int rows;
     int cols;
     std::vector<std::vector<int>> cells;
@@ -16,7 +16,7 @@ class Map {
 public:
     Map(int rows, int cols);
 
-    RaycastResult CastRay(Vector2 start_pos, Vector2 dir);
+    RaycastResult CastRay(const Vector2& start_pos, const Vector2& dir);
     bool InBounds(int r, int c);
     bool IsSolid(int r, int c);
     int GetCell(int r, int c);
