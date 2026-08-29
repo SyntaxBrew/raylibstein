@@ -29,23 +29,28 @@ void Render2DMap(Map& map) {
 
 int main() {
     Map map{8, 8};
- 
-    //std::cout << map.in_bounds(1, 10) << "\n";
+    float angle = 30;
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Liminalstein");
     SetTargetFPS(60);
 
     while (!WindowShouldClose()) {
+        float dt = GetFrameTime();
+
         BeginDrawing();
-        ClearBackground(BLACK);
-        Render2DMap(map);
+            ClearBackground(BLACK);
+            Render2DMap(map);
+            
+            angle += 64.0f * dt;
+            RaycastResult result = map.CastRay({1.5, 1.5}, AngleToVector2(angle));
+
+            DrawLineV(
+                Vector2Scale(result.start_pos, CELL_SIZE),
+                Vector2Scale(result.end_pos, CELL_SIZE),
+                RED
+            );
         EndDrawing();
     }
-
-    RaycastResult result = map.CastRay({1.5, 1.5}, AngleToVector2(60));
-    std::cout << result.distance << "\n";
-    std::cout << result.direction.x << "," << result.direction.y << "\n";
-
-    std::cout << "Hello, Backrooms!\n";
+    //std::cout << result.to_str() << "\n";
     return 0;
 }

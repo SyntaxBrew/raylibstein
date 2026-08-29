@@ -19,26 +19,29 @@ Map::Map(int rows, int cols) : rows(rows), cols(cols) {
 }
 
 RaycastResult Map::CastRay(const Vector2& start_pos, const Vector2& dir) {
-    float side_dist_x = inf; // Running total to the next vertical line
-    float side_dist_y = inf; // Running total to the next horizontal line
+    float initial_dist_x = 0.0; // Horizontal dist to the first vertical line
+    float initial_dist_y = 0.0; // Vertical dist to the first horizontal line
 
-    // Totals initialized as distance to the first vertical/horizontal grid lines
     if (dir.x > 0) 
-        side_dist_x = std::ceilf(start_pos.x) - start_pos.x;
+        initial_dist_x = (int) (start_pos.x + 1) - start_pos.x;
     else if (dir.x < 0)
-        side_dist_x = start_pos.x - std::floorf(start_pos.x); 
+        initial_dist_x = start_pos.x - (int) (start_pos.x); 
 
     if (dir.y > 0)
-        side_dist_y = std::ceilf(start_pos.y) - start_pos.y;
+        initial_dist_y = (int) (start_pos.y + 1) - start_pos.y;
     else if (dir.y < 0)
-        side_dist_y = start_pos.y - std::floorf(start_pos.y); 
+        initial_dist_y = start_pos.y - (int) (start_pos.y); 
 
-    float delta_dist_x = std::abs(1.0 / dir.x); // angled dist between each vertical line
-    float delta_dist_y = std::abs(1.0 / dir.y); // angled dist between each horizontal line
+    // Running totals initialized as angled dists to the first vertical/horizontal grid lines
+    float side_dist_x = std::fabs(initial_dist_x / dir.x);
+    float side_dist_y = std::fabs(initial_dist_y / dir.y);
+
+    float delta_dist_x = std::fabs(1.0 / dir.x); // angled dist between each vertical line
+    float delta_dist_y = std::fabs(1.0 / dir.y); // angled dist between each horizontal line
 
     // we can increment x, y counters instead of re-calculating cell positions
-    int row = (int) start_pos.x;
-    int col = (int) start_pos.y;
+    int col = (int) start_pos.x;
+    int row = (int) start_pos.y;
     int step_x = dir.x == 0 ? 0 : (dir.x > 0 ? 1 : -1); 
     int step_y = dir.y == 0 ? 0 : (dir.y > 0 ? 1 : -1); 
 
@@ -48,30 +51,33 @@ RaycastResult Map::CastRay(const Vector2& start_pos, const Vector2& dir) {
 
     while (!hit && InBounds(row, col)) {
         // choose the closest grid line (what the ray hits first)
-
-        // vertical hit
+        // vertical line
         if (side_dist_x < side_dist_y) { 
             dist_travelled = side_dist_x;
-            row += step_x;
+            col += step_x;
             side_dist_x += delta_dist_x;
             is_vertical = true;
         
-        // horizontal hit
+        // horizontal line
         } else {
             dist_travelled = side_dist_y;
-            col += step_y;
+            row += step_y;
             side_dist_y += delta_dist_y;
             is_vertical = false;
         }
 
+        std::cout << dist_travelled << "\n";
+        std::cout << row << ", " << col << "\n";
         if (IsSolid(row, col)) {
             hit = true;
         }
     }
 
     return {
-        dist_travelled,
+        hit ? dist_travelled : inf,
         dir,
+        start_pos,
+        {start_pos.x + dist_travelled * dir.x, start_pos.y + dist_travelled * dir.y},
         hit,
         is_vertical
     };
