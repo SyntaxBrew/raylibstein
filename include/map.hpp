@@ -1,4 +1,10 @@
 #include <vector>
+#include "raymath.h"
+
+struct RaycastResult {
+    float distance;
+    bool is_vertical;
+};
 
 class Map {
     int rows;
@@ -7,7 +13,9 @@ class Map {
 
 public:
     Map(int rows, int cols);
-    bool in_bounds(int r, int c);
-    bool is_solid(int r, int c);
-    int get_cell(int r, int c);
+
+    RaycastResult CastRay(Vector2 start_pos, Vector2 dir);
+    bool InBounds(int r, int c);
+    bool IsSolid(int r, int c);
+    int GetCell(int r, int c);
 };
