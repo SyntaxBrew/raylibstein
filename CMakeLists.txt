@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(Liminalstein CXX) # CXX = C++
 
-set(CMAKE_CXX_STANDARD 17) # C++ 17
+set(CMAKE_CXX_STANDARD 20) # C++ 20
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # Enforces C++ standard
 
 # Built-in tool for directly downloading external libraries directly inside the build folder at run-time
