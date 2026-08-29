@@ -1,5 +1,8 @@
 .vscode/
 .idea/
 build/
-docs/project_roadmap_preview.md
+temp/
 *.obsidian
+
+docs/project_roadmap_preview.md
+docs/project_pipeline.md
