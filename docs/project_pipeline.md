@@ -26,15 +26,14 @@ CMake
 
 Build System (**Ninja**, GNU Make)
 - Reads the configuration
-- The tool that actually executes the preprocessor, compiler, assembler, and linker
-- Checks what files rely on each other (dependencies)
-- Recompiles files that you've changed
+- Orchestrates the preprocessor, compiler, assembler, and linker
+- Handles file dependencies
 
 ↓
 
 Preprocessor
-- Expands headers, macros, and other preprocessor directives in each translation unit
-- Essentially copies and pastes text into your source files
+- Transforms the source code before handing it off to the compiler
+- Expands headers (literally copies the code content and pastes it at that specific line)
 
 ↓
 
