@@ -2,6 +2,7 @@
 .idea/
 build/
 temp/
+docs/devlogs
 *.obsidian
 
 docs/project_roadmap_preview.md

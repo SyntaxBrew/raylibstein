@@ -1,11 +1,12 @@
 #include "raymath.h"
 
 struct Player {
-    Vector2 position;
-    Vector2 direction;
+    Vector2 pos;
+    Vector2 look_dir;
     Vector2 plane;
+    Vector2 move_dir;
     float speed;
     float radius;
-    
-    Player(Vector2 pos, Vector2 dir, float speed, float radius);
+
+    Player(Vector2 pos, Vector2 look_dir, float speed, float radius);
 };

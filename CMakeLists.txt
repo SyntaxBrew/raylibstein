@@ -18,7 +18,9 @@ FetchContent_MakeAvailable(raylib)
 
 add_executable(Liminalstein
     src/main.cpp
+    src/game.cpp
     src/map.cpp
+    src/player.cpp
 )
 
 # PRIVATE = only exposes stuff to your files
