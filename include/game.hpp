@@ -13,14 +13,14 @@ private:
     int cell_2D_length = 64;
 
     Map map = Map(8, 8);
-    Player player = Player({1.5, 1.5}, {0, 1}, 1, 0.5);
+    Player player = Player({1.5, 1.5}, {0, 1}, 1, 0.1);
 
 public:
     Game();
     ~Game();
 
     void Run();
-    void ProcessInputs();
+    void ProcessInputs(float dt);
     void Update(float dt);
     void Render();
 };
