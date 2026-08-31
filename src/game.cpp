@@ -32,15 +32,20 @@ void Game::Run() {
 
 // TODO: MOVE DIRECT LOOK_DIR, MOVE_DIR UPDATES TO UPDATE METHOD, USE INPUT STATE STRUCT
 void Game::ProcessInputs(float dt) {
-    int turn = 0;
-    if (IsKeyDown(KEY_LEFT)) {
-        turn--;
-    }
-    if (IsKeyDown(KEY_RIGHT)) {
-        turn++;
-    }
+    this->input_state.turn = 0; // cw/ccw rotation
+    this->input_state.forward = 0; // forward motion
+    this->input_state.perp = 0; // sideways motion
+    
+    if (IsKeyDown(KEY_LEFT)) this->input_state.turn--;
+    if (IsKeyDown(KEY_RIGHT)) this->input_state.turn++;
+    if (IsKeyDown(KEY_W)) this->input_state.forward++;
+    if (IsKeyDown(KEY_S)) this->input_state.forward--;
+    if (IsKeyDown(KEY_D)) this->input_state.perp++;
+    if (IsKeyDown(KEY_A)) this->input_state.perp--;
+}
 
-    float angle_step = 2.0f * dt * turn;
+void Game::Update(float dt) {
+    float angle_step = 2.0f * dt * this->input_state.turn;
     float old_dir_x = player.look_dir.x; 
     float old_dir_y = player.look_dir.y;
 
@@ -53,21 +58,13 @@ void Game::ProcessInputs(float dt) {
 
     std::cout << player.look_dir.x << ", " << player.look_dir.y << "\n";
 
-    int forward = 0; // forward/backward
-    int perp = 0; // left/right (sideways movement)
-
-    if (IsKeyDown(KEY_W)) forward++;
-    if (IsKeyDown(KEY_S)) forward--;
-    if (IsKeyDown(KEY_D)) perp++;
-    if (IsKeyDown(KEY_A)) perp--;
-
-    Vector2 foward_dir = Vector2Scale(player.look_dir, forward);
-    Vector2 perp_dir = Vector2Scale({-player.look_dir.y, player.look_dir.x}, perp);
+    Vector2 foward_dir = Vector2Scale(player.look_dir, this->input_state.forward);
+    Vector2 perp_dir = Vector2Scale({-player.look_dir.y, player.look_dir.x}, this->input_state.perp);
+    // Combine forward and perpendiular directions to calculate where player is moving
     player.move_dir = Vector2Normalize(Vector2Add(foward_dir, perp_dir));
-}
 
-void Game::Update(float dt) {
-    
+    Vector2 delta_pos = Vector2Scale(player.move_dir, player.speed * dt); // change in player position after dt seconds, scaled by player speed
+    player.pos = Vector2Add(player.pos, delta_pos);
 }
 
 void Game::Render() {
