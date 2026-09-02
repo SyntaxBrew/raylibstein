@@ -71,7 +71,6 @@ void Game::Update(float dt) {
     player.look_dir = Vector2Normalize(player.look_dir); 
 
     //player.look_dir = Vector2Normalize(Vector2Subtract(this->input_state.mouse_pos, Vector2Scale(player.pos, this->cell_2D_length)));
-
     // std::cout << player.look_dir.x << ", " << player.look_dir.y << "\n";
 
     Vector2 foward_dir = Vector2Scale(player.look_dir, this->input_state.forward);
@@ -130,14 +129,9 @@ void Game::Render() {
     Color* pixels = (Color*) this->cpu_image.data;
     std::fill(pixels, pixels + this->window_width * this->window_height, BLACK); // Clear previous CPU pixel buffer
 
-    // Update GPU buffer with color pixel data from CPU
-    UpdateTexture(this->gpu_texture, pixels);
-
-    BeginDrawing();
-    ClearBackground(BLACK); // Clear previous GPU canvas 
-    DrawTexture(this->gpu_texture, 0, 0, WHITE);
-    
-    for (int col = 0; col < this->window_width; col += this->ray_offset) {
+    // Update pixels
+    for (int col = 0; col < this->window_width; col++) {
+        // Automatically truncates down to the nearest raycast result for offsets > 1
         RaycastResult& result = this->raycasts[col / ray_offset];
 
         // Prevent wall warping (fish-eye correction) by using perpendicular distances instead of total distance
@@ -151,10 +145,24 @@ void Game::Render() {
         // Snap height to pixelated steps, remove fractional portion, then multiply back 
         int px_strip_height = ((int) std::roundf(strip_height / this->ray_offset)) * this->ray_offset;
 
-        DrawRectangle(col, this->window_height / 2 - px_strip_height / 2, this->ray_offset, px_strip_height, result.is_vertical ? BLUE : DARKBLUE);
+        int top_boundary = this->window_height / 2 - px_strip_height / 2;
+        int bottom_boundary = this->window_height / 2 + px_strip_height / 2;
 
-        //if (result.distance <= player.radius * 1.01) std::cout << result.distance << "\n";
+        for (int row = 0; row < this->window_height; row++) {
+            if (top_boundary <= row && row < bottom_boundary) {
+                // Convert 2D coordinates to a 1D index
+                int index = (row * this->window_width) + col;
+                pixels[index] = result.is_vertical ? BLUE : DARKBLUE;
+            }
+        }
     }
+
+    // Update GPU buffer with color pixel data from CPU
+    UpdateTexture(this->gpu_texture, pixels);
+
+    BeginDrawing();
+    ClearBackground(BLACK); // Clear previous GPU canvas 
+    DrawTexture(this->gpu_texture, 0, 0, WHITE);
 
     int CELL_SIZE = this->cell_2D_length;
     for (int r = 0; r < this->map.rows; r++) {
