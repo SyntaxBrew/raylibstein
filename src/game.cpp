@@ -1,4 +1,5 @@
 #include "game.hpp"
+#include <algorithm>
 
 float DegreesToRads(float degrees) {
     return degrees * (std::numbers::pi / 180.0f);
@@ -11,10 +12,11 @@ Vector2 AngleToVector2(float angle) {
 Game::Game() {
     InitWindow(this->window_width, this->window_height, "Liminalstein");
     SetTargetFPS(60);
+    DisableCursor();
 
     this->cpu_image = GenImageColor(this->window_width, this->window_height, BLACK);
     this->gpu_texture = LoadTextureFromImage(this->cpu_image);
-    this->focal_length = (this->window_width / 2.0f) / std::tanf(DegreesToRads(player.fov / 2)); // distance from player's eyes to flat screen surface
+    this->focal_length = (this->window_width / 2.0f) / std::tanf(DegreesToRads(this->fov / 2));
 }
 
 Game::~Game() {
@@ -39,6 +41,13 @@ void Game::ProcessInputs(float dt) {
     this->input_state.forward = 0; // forward motion
     this->input_state.perp = 0; // sideways motion
     this->input_state.mouse_pos = GetMousePosition();
+
+    Vector2 mouse_delta = GetMouseDelta();
+    this->input_state.turn += mouse_delta.x * 0.1;
+
+    float mouse_wheel_delta = GetMouseWheelMove();
+    this->fov = std::clamp(this->fov * (1 - (0.02f * mouse_wheel_delta)), 1.0f, 179.0f);
+    this->focal_length = (this->window_width / 2.0f) / std::tanf(DegreesToRads(this->fov / 2));
     
     if (IsKeyDown(KEY_LEFT)) this->input_state.turn--;
     if (IsKeyDown(KEY_RIGHT)) this->input_state.turn++;
@@ -50,7 +59,7 @@ void Game::ProcessInputs(float dt) {
 
 void Game::Update(float dt) {
     
-    float angle_step = 2.0f * dt * this->input_state.turn;
+    float angle_step = dt * this->input_state.turn;
     float old_dir_x = player.look_dir.x; 
     float old_dir_y = player.look_dir.y;
 
@@ -60,7 +69,6 @@ void Game::Update(float dt) {
 
     // Prevent floating-point rounding errors from accumulating
     player.look_dir = Vector2Normalize(player.look_dir); 
-    
 
     //player.look_dir = Vector2Normalize(Vector2Subtract(this->input_state.mouse_pos, Vector2Scale(player.pos, this->cell_2D_length)));
 
@@ -102,7 +110,7 @@ void Game::Update(float dt) {
     for (int col = 0; col < this->window_width; col++) {
         // Map each screen column to a bipolar X-coordinate [-1.0, 1.0] on the camera plane to give direction (left/right side of screen)
         float plane_x = ((2.0f * (float) col) / this->window_width) - 1; 
-        float plane_length = std::tanf(DegreesToRads(player.fov / 2));
+        float plane_length = std::tanf(DegreesToRads(this->fov / 2));
 
         // Generate a perpendicular plane vector scaled by FOV and screen position
         Vector2 plane = Vector2Scale({-player.look_dir.y, player.look_dir.x}, plane_length * plane_x);

@@ -7,8 +7,9 @@
 #include "map.hpp"
 #include "player.hpp"
 
+
 struct InputState {
-    int turn = 0;
+    float turn = 0;
     int forward = 0;
     int perp = 0;
     Vector2 mouse_pos;
@@ -19,10 +20,11 @@ private:
     int window_width = 1280;
     int window_height = 720;
     int cell_2D_length = 16;
+    float fov = 90;
     float focal_length;
 
     Map map = Map(8, 8);
-    Player player = Player({1.5, 1.5}, {0, 1}, 1, 0.1, 90);
+    Player player = Player({1.5, 1.5}, {0, 1}, 1, 0.1);
     InputState input_state;
     std::vector<RaycastResult> raycasts{};
 
