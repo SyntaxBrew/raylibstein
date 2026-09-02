@@ -35,6 +35,7 @@ void Game::ProcessInputs(float dt) {
     this->input_state.turn = 0; // cw/ccw rotation
     this->input_state.forward = 0; // forward motion
     this->input_state.perp = 0; // sideways motion
+    this->input_state.mouse_pos = GetMousePosition();
     
     if (IsKeyDown(KEY_LEFT)) this->input_state.turn--;
     if (IsKeyDown(KEY_RIGHT)) this->input_state.turn++;
@@ -45,6 +46,7 @@ void Game::ProcessInputs(float dt) {
 }
 
 void Game::Update(float dt) {
+    /*
     float angle_step = 2.0f * dt * this->input_state.turn;
     float old_dir_x = player.look_dir.x; 
     float old_dir_y = player.look_dir.y;
@@ -55,6 +57,9 @@ void Game::Update(float dt) {
 
     // Prevent floating-point rounding errors from accumulating
     player.look_dir = Vector2Normalize(player.look_dir); 
+    */
+
+    player.look_dir = Vector2Normalize(Vector2Subtract(this->input_state.mouse_pos, Vector2Scale(player.pos, this->cell_2D_length)));
 
     std::cout << player.look_dir.x << ", " << player.look_dir.y << "\n";
 
@@ -64,6 +69,30 @@ void Game::Update(float dt) {
     player.move_dir = Vector2Normalize(Vector2Add(foward_dir, perp_dir));
 
     Vector2 delta_pos = Vector2Scale(player.move_dir, player.speed * dt); // change in player position after dt seconds, scaled by player speed
+    Vector2 proposed_pos = Vector2Add(player.pos, delta_pos); // candidate pos to test whether it's actually possible to move there first
+    Map& map = this->map;
+
+    // Handle horizontal movement, check top and bottom boundaries
+    // If its currently halfway under/above a corner, no horizontal movement occurs
+    for (int y_dir : {-1, 1}) {
+        for (int x_dir: {-1, 1}) {
+            if (map.IsSolid(player.pos.y + player.radius * y_dir, proposed_pos.x + player.radius * x_dir)) {
+                delta_pos.x = 0;
+            }
+        }
+    }
+
+    // Handles vertical movement, check left and right boundaries
+    // If its currently halfway to the left/right of a corner, no vertical movement occurs
+    // Prevent corner-clipping to the left/right sides of a wall 
+    for (int y_dir : {-1, 1}) {
+        for (int x_dir : {-1, 1}) {
+            if (map.IsSolid(proposed_pos.y + player.radius * y_dir, player.pos.x + player.radius * x_dir)) {
+                delta_pos.y = 0;
+            }
+        }
+    }
+  
     player.pos = Vector2Add(player.pos, delta_pos);
 }
 

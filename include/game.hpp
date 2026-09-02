@@ -10,6 +10,7 @@ struct InputState {
     int turn = 0;
     int forward = 0;
     int perp = 0;
+    Vector2 mouse_pos;
 };
 
 class Game {
