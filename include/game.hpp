@@ -20,6 +20,7 @@ private:
     int window_width = 1280;
     int window_height = 720;
     int cell_2D_length = 16;
+    int ray_offset = 8;
     float fov = 90;
     float focal_length;
 

@@ -107,7 +107,7 @@ void Game::Update(float dt) {
     player.pos = Vector2Add(player.pos, delta_pos);
 
     this->raycasts.clear();
-    for (int col = 0; col < this->window_width; col++) {
+    for (int col = 0; col < this->window_width; col += ray_offset) {
         // Map each screen column to a bipolar X-coordinate [-1.0, 1.0] on the camera plane to give direction (left/right side of screen)
         float plane_x = ((2.0f * (float) col) / this->window_width) - 1; 
         float plane_length = std::tanf(DegreesToRads(this->fov / 2));
@@ -137,8 +137,8 @@ void Game::Render() {
     ClearBackground(BLACK); // Clear previous GPU canvas 
     DrawTexture(this->gpu_texture, 0, 0, WHITE);
     
-    for (int col = 0; col < this->window_width; col++) {
-        RaycastResult& result = this->raycasts[col];
+    for (int col = 0; col < this->window_width; col += this->ray_offset) {
+        RaycastResult& result = this->raycasts[col / ray_offset];
 
         // Prevent wall warping (fish-eye correction) by using perpendicular distances instead of total distance
         // Diagonal rays travel farther at an angle, so always ignore the extra parallel distance added
@@ -148,7 +148,10 @@ void Game::Render() {
         // Multiply height of each strip by the ratio: half-width of actual window / half-width of virtual camera
         // This scales up the entire game (distances) to the proper window size
         float strip_height = (1.0f / perp_dist) * focal_length;
-        DrawRectangle(col, this->window_height / 2 - strip_height / 2, 1, strip_height, result.is_vertical ? BLUE : DARKBLUE);
+        // Snap height to pixelated steps, remove fractional portion, then multiply back 
+        int px_strip_height = ((int) std::roundf(strip_height / this->ray_offset)) * this->ray_offset;
+
+        DrawRectangle(col, this->window_height / 2 - px_strip_height / 2, this->ray_offset, px_strip_height, result.is_vertical ? BLUE : DARKBLUE);
 
         //if (result.distance <= player.radius * 1.01) std::cout << result.distance << "\n";
     }
