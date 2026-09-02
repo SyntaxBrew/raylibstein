@@ -18,7 +18,8 @@ class Game {
 private:
     int window_width = 1280;
     int window_height = 720;
-    int cell_2D_length = 64;
+    int cell_2D_length = 16;
+    float focal_length;
 
     Map map = Map(8, 8);
     Player player = Player({1.5, 1.5}, {0, 1}, 1, 0.1, 90);

@@ -14,6 +14,7 @@ Game::Game() {
 
     this->cpu_image = GenImageColor(this->window_width, this->window_height, BLACK);
     this->gpu_texture = LoadTextureFromImage(this->cpu_image);
+    this->focal_length = (this->window_width / 2.0f) / std::tanf(DegreesToRads(player.fov / 2)); // distance from player's eyes to flat screen surface
 }
 
 Game::~Game() {
@@ -127,6 +128,17 @@ void Game::Render() {
     BeginDrawing();
     ClearBackground(BLACK); // Clear previous GPU canvas 
     DrawTexture(this->gpu_texture, 0, 0, WHITE);
+    
+    for (int col = 0; col < this->window_width; col++) {
+        RaycastResult& result = this->raycasts[col];
+
+        // Multiply height of each strip by the ratio: half-width of actual window / half-width of virtual camera
+        // This scales up the entire game (distances) to the proper window size
+        float strip_height = (1.0f / result.distance) * focal_length;
+        DrawRectangle(col, this->window_height / 2 - strip_height / 2, 1, strip_height, result.is_vertical ? BLUE : DARKBLUE);
+
+        //if (result.distance <= player.radius * 1.01) std::cout << result.distance << "\n";
+    }
 
     int CELL_SIZE = this->cell_2D_length;
     for (int r = 0; r < this->map.rows; r++) {
@@ -143,8 +155,8 @@ void Game::Render() {
 
     DrawCircleV(player_render_pos, player_render_radius, GREEN);
     DrawLineV(player_render_pos, Vector2Add(player_render_pos, Vector2Scale(player.look_dir, CELL_SIZE)), BLUE);
-    
-    for (RaycastResult& result: this->raycasts) {
+
+    for (RaycastResult& result: this->raycasts) {   
         DrawLineV(
             Vector2Scale(result.start_pos, CELL_SIZE),
             Vector2Scale(result.end_pos, CELL_SIZE),
