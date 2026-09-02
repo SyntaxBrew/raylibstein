@@ -24,7 +24,12 @@ private:
     float focal_length;
 
     Map map = Map(8, 8);
-    Player player = Player({1.5, 1.5}, {0, 1}, 1, 0.1);
+    Player player = {
+        .pos = {1.5, 1.5},
+        .look_dir = {0, 1},
+        .speed = 1,
+        .radius = 0.1
+    };
     InputState input_state;
     std::vector<RaycastResult> raycasts{};
 
