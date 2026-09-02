@@ -63,7 +63,7 @@ void Game::Update(float dt) {
 
     player.look_dir = Vector2Normalize(Vector2Subtract(this->input_state.mouse_pos, Vector2Scale(player.pos, this->cell_2D_length)));
 
-    std::cout << player.look_dir.x << ", " << player.look_dir.y << "\n";
+    // std::cout << player.look_dir.x << ", " << player.look_dir.y << "\n";
 
     Vector2 foward_dir = Vector2Scale(player.look_dir, this->input_state.forward);
     Vector2 perp_dir = Vector2Scale({-player.look_dir.y, player.look_dir.x}, this->input_state.perp);
@@ -101,12 +101,13 @@ void Game::Update(float dt) {
 void Game::Render() {
     // Extract color pixel data from CPU buffer
     Color* pixels = (Color*) this->cpu_image.data;
-    pixels[0] = RED;
+    std::fill(pixels, pixels + this->window_width * this->window_height, BLACK); // Clear previous CPU pixel buffer
 
     // Update GPU buffer with color pixel data from CPU
     UpdateTexture(this->gpu_texture, pixels);
 
     BeginDrawing();
+    ClearBackground(BLACK); // Clear previous GPU canvas 
     DrawTexture(this->gpu_texture, 0, 0, WHITE);
 
     /*
