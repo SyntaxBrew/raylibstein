@@ -49,7 +49,7 @@ void Game::ProcessInputs(float dt) {
 }
 
 void Game::Update(float dt) {
-    /*
+    
     float angle_step = 2.0f * dt * this->input_state.turn;
     float old_dir_x = player.look_dir.x; 
     float old_dir_y = player.look_dir.y;
@@ -60,9 +60,9 @@ void Game::Update(float dt) {
 
     // Prevent floating-point rounding errors from accumulating
     player.look_dir = Vector2Normalize(player.look_dir); 
-    */
+    
 
-    player.look_dir = Vector2Normalize(Vector2Subtract(this->input_state.mouse_pos, Vector2Scale(player.pos, this->cell_2D_length)));
+    //player.look_dir = Vector2Normalize(Vector2Subtract(this->input_state.mouse_pos, Vector2Scale(player.pos, this->cell_2D_length)));
 
     // std::cout << player.look_dir.x << ", " << player.look_dir.y << "\n";
 
@@ -132,9 +132,14 @@ void Game::Render() {
     for (int col = 0; col < this->window_width; col++) {
         RaycastResult& result = this->raycasts[col];
 
+        // Prevent wall warping (fish-eye correction) by using perpendicular distances instead of total distance
+        // Diagonal rays travel farther at an angle, so always ignore the extra parallel distance added
+        float dot_product = Vector2DotProduct(player.look_dir, result.dir); // x1 * x2 + y1 * y1
+        float perp_dist = result.distance * (dot_product / (Vector2Length(player.look_dir) * Vector2Length(result.dir))); 
+
         // Multiply height of each strip by the ratio: half-width of actual window / half-width of virtual camera
         // This scales up the entire game (distances) to the proper window size
-        float strip_height = (1.0f / result.distance) * focal_length;
+        float strip_height = (1.0f / perp_dist) * focal_length;
         DrawRectangle(col, this->window_height / 2 - strip_height / 2, 1, strip_height, result.is_vertical ? BLUE : DARKBLUE);
 
         //if (result.distance <= player.radius * 1.01) std::cout << result.distance << "\n";
