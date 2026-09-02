@@ -19,8 +19,8 @@ Map::Map(int rows, int cols) : rows(rows), cols(cols) {
 }
 
 RaycastResult Map::CastRay(const Vector2& start_pos, const Vector2& dir) {
-    float initial_dist_x = 0.0; // Horizontal dist to the first vertical line
-    float initial_dist_y = 0.0; // Vertical dist to the first horizontal line
+    float initial_dist_x = inf; // Horizontal dist to the first vertical line
+    float initial_dist_y = inf; // Vertical dist to the first horizontal line
 
     if (dir.x > 0) 
         initial_dist_x = (int) (start_pos.x + 1) - start_pos.x;
@@ -66,8 +66,9 @@ RaycastResult Map::CastRay(const Vector2& start_pos, const Vector2& dir) {
             is_vertical = false;
         }
 
-        std::cout << dist_travelled << "\n";
-        std::cout << row << ", " << col << "\n";
+        //std::cout << dist_travelled << "\n";
+        //std::cout << row << ", " << col << "\n";
+        
         if (IsSolid(row, col)) {
             hit = true;
         }

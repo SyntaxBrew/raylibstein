@@ -1,5 +1,6 @@
 #include <iostream>
 #include <numbers>
+#include <vector>
 
 #include "raylib.h"
 
@@ -20,8 +21,9 @@ private:
     int cell_2D_length = 64;
 
     Map map = Map(8, 8);
-    Player player = Player({1.5, 1.5}, {0, 1}, 1, 0.1);
+    Player player = Player({1.5, 1.5}, {0, 1}, 1, 0.1, 90);
     InputState input_state;
+    std::vector<RaycastResult> raycasts{};
 
     Image cpu_image;       // image is a cpu-side structure
     Texture2D gpu_texture;   // texture is a gpu-side structure

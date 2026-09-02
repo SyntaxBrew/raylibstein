@@ -96,6 +96,24 @@ void Game::Update(float dt) {
     }
   
     player.pos = Vector2Add(player.pos, delta_pos);
+
+    this->raycasts.clear();
+    for (int col = 0; col < this->window_width; col++) {
+        // Map each screen column to a bipolar X-coordinate [-1.0, 1.0] on the camera plane to give direction (left/right side of screen)
+        float plane_x = ((2.0f * (float) col) / this->window_width) - 1; 
+        float plane_length = std::tanf(DegreesToRads(player.fov / 2));
+
+        // Generate a perpendicular plane vector scaled by FOV and screen position
+        Vector2 plane = Vector2Scale({-player.look_dir.y, player.look_dir.x}, plane_length * plane_x);
+
+        // The direction of each ray is calculated from the evenly spaced plane X-offsets
+        // This ensures that rays are evenly spaced across the flat screen projection
+        // Fixes distortion near the edges of the screen
+        Vector2 ray_dir = Vector2Normalize(Vector2Add(player.look_dir, plane));
+
+        RaycastResult result = this->map.CastRay(player.pos, ray_dir);
+        this->raycasts.push_back(result);
+    }
 }
 
 void Game::Render() {
@@ -110,7 +128,6 @@ void Game::Render() {
     ClearBackground(BLACK); // Clear previous GPU canvas 
     DrawTexture(this->gpu_texture, 0, 0, WHITE);
 
-    /*
     int CELL_SIZE = this->cell_2D_length;
     for (int r = 0; r < this->map.rows; r++) {
         for (int c = 0; c < this->map.cols; c++) {
@@ -126,7 +143,14 @@ void Game::Render() {
 
     DrawCircleV(player_render_pos, player_render_radius, GREEN);
     DrawLineV(player_render_pos, Vector2Add(player_render_pos, Vector2Scale(player.look_dir, CELL_SIZE)), BLUE);
-    */
+    
+    for (RaycastResult& result: this->raycasts) {
+        DrawLineV(
+            Vector2Scale(result.start_pos, CELL_SIZE),
+            Vector2Scale(result.end_pos, CELL_SIZE),
+            RED
+        );
+    }
 
     EndDrawing();
 }
