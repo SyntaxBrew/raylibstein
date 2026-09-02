@@ -9,17 +9,19 @@ Vector2 AngleToVector2(float angle) {
 }
 
 Game::Game() {
-   
-}
-
-Game::~Game() {
-   
-}
-
-void Game::Run() {
     InitWindow(this->window_width, this->window_height, "Liminalstein");
     SetTargetFPS(60);
 
+    this->cpu_image = GenImageColor(this->window_width, this->window_height, BLACK);
+    this->gpu_texture = LoadTextureFromImage(this->cpu_image);
+}
+
+Game::~Game() {
+   UnloadImage(this->cpu_image);
+   UnloadTexture(this->gpu_texture);
+}
+
+void Game::Run() {
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
         ProcessInputs(dt);
@@ -97,15 +99,21 @@ void Game::Update(float dt) {
 }
 
 void Game::Render() {
+    // Extract color pixel data from CPU buffer
+    Color* pixels = (Color*) this->cpu_image.data;
+    pixels[0] = RED;
+
+    // Update GPU buffer with color pixel data from CPU
+    UpdateTexture(this->gpu_texture, pixels);
+
     BeginDrawing();
+    DrawTexture(this->gpu_texture, 0, 0, WHITE);
 
-    ClearBackground(BLACK);
+    /*
     int CELL_SIZE = this->cell_2D_length;
-
     for (int r = 0; r < this->map.rows; r++) {
         for (int c = 0; c < this->map.cols; c++) {
             DrawRectangle(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE, map.IsSolid(r, c) ? WHITE : BLACK);
-            
             // Draw cell outlines
             DrawRectangle((c+1) * CELL_SIZE - 1, r * CELL_SIZE, 2, CELL_SIZE, GRAY);
             DrawRectangle(c * CELL_SIZE, (r+1) * CELL_SIZE - 1, CELL_SIZE, 2, GRAY);
@@ -117,6 +125,7 @@ void Game::Render() {
 
     DrawCircleV(player_render_pos, player_render_radius, GREEN);
     DrawLineV(player_render_pos, Vector2Add(player_render_pos, Vector2Scale(player.look_dir, CELL_SIZE)), BLUE);
+    */
 
     EndDrawing();
 }

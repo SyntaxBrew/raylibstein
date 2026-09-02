@@ -23,6 +23,9 @@ private:
     Player player = Player({1.5, 1.5}, {0, 1}, 1, 0.1);
     InputState input_state;
 
+    Image cpu_image;       // image is a cpu-side structure
+    Texture2D gpu_texture;   // texture is a gpu-side structure
+
 public:
     Game();
     ~Game();
