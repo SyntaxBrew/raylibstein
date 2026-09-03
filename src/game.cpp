@@ -24,8 +24,14 @@ Game::Game() {
 }
 
 Game::~Game() {
-   UnloadImage(this->cpu_image);
-   UnloadTexture(this->gpu_texture);
+    UnloadImage(this->cpu_image);
+    UnloadTexture(this->gpu_texture);
+
+    for (const auto& [id, map_texture]: this->map_textures) {
+        const auto& [image, pixels] = map_texture;
+        UnloadImage(image);
+        UnloadImageColors(pixels);
+    }
 }
 
 void Game::Run() {
@@ -155,13 +161,19 @@ void Game::Render() {
 
         int top_boundary = this->window_height / 2 - px_strip_height / 2;
         int bottom_boundary = this->window_height / 2 + px_strip_height / 2;
+        MapTexture& map_texture = this->map_textures.at(result.cell_type);
 
         // Update each corresponding pixel within the strip boundary
         for (int row = 0; row < this->window_height; row++) {
             if (top_boundary <= row && row < bottom_boundary) {
+                int texture_col = (result.is_vertical ? result.end_pos.y - (int) result.end_pos.y : result.end_pos.x - (int) result.end_pos.x) * 64;
+                int texture_row = ((float) (row - top_boundary) / px_strip_height) * 64;
+                int texture_index = texture_row * 64 + texture_col;
+
+                //max = std::max(texture_col * texture_row, max);
                 // Convert 2D coordinates to a 1D index
                 int index = (row * this->window_width) + col;
-                pixels[index] = result.is_vertical ? BLUE : DARKBLUE;
+                pixels[index] = map_texture.pixels[texture_index];
             }
         }
     }

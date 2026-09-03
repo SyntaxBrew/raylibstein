@@ -18,8 +18,8 @@ struct InputState {
 };
 
 struct MapTexture {
-    Image image;
-    Color* pixels;
+    Image image;               // contains metadata and pixel data
+    Color* pixels;          
 
     MapTexture(std::string image_path) {
         this->image = LoadImage(image_path.c_str());    // load image into CPU memory
@@ -32,7 +32,7 @@ private:
     int window_width = 1280;
     int window_height = 720;
     int cell_2D_length = 16;
-    int ray_offset = 1;
+    int ray_offset = 4;
     float fov = 90;
     float focal_length;
     bool noclip = false;
