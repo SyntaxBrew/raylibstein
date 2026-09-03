@@ -31,15 +31,15 @@ class Game {
 private:
     int window_width = 1280;
     int window_height = 720;
-    int cell_2D_length = 16;
+    int cell_2D_length = 8;
     int ray_offset = 4;
     float fov = 90;
     float focal_length;
     bool noclip = false;
 
-    Map map = Map(8, 8);
+    Map map = Map(16, 16);
     Player player = {
-        .pos = {1.5, 1.5},
+        .pos = {3, 10},
         .look_dir = {0, 1},
         .speed = 1,
         .radius = 0.1

@@ -18,6 +18,7 @@ Game::Game() {
     this->gpu_texture = LoadTextureFromImage(this->cpu_image);
     this->map_textures = {
         {1, MapTexture("assets/textures/lobby_wall.png")},
+        {2, MapTexture("assets/textures/manila_wall.png")},
     };
 
     this->focal_length = (this->window_width / 2.0f) / std::tanf(DegreesToRads(this->fov / 2));
@@ -161,9 +162,14 @@ void Game::Render() {
 
         int top_boundary = this->window_height / 2 - px_strip_height / 2;
         int bottom_boundary = this->window_height / 2 + px_strip_height / 2;
-        MapTexture& map_texture = this->map_textures.at(result.cell_type);
-
+      
+        MapTexture* map_texture = nullptr;
+        if (this->map_textures.contains(result.cell_type)) {
+            map_texture = &this->map_textures.at(result.cell_type);
+        }
+       
         for (int row = 0; row < this->window_height; row++) {
+            // Convert 2D coordinates to a 1D index
             int index = (row * this->window_width) + col;
 
             // Roof
@@ -176,16 +182,14 @@ void Game::Render() {
                 pixels[index] = {113, 98, 33, 255};
             }
 
-            // Update each corresponding pixel within the strip boundary
-            if (top_boundary <= row && row < bottom_boundary) {
-                int texture_col = (result.is_vertical ? result.end_pos.y - (int) result.end_pos.y : result.end_pos.x - (int) result.end_pos.x) * 64;
-                int texture_row = ((float) (row - top_boundary) / px_strip_height) * 64;
-                int texture_index = texture_row * 64 + texture_col;
-
-                //max = std::max(texture_col * texture_row, max);
-                // Convert 2D coordinates to a 1D index
-              
-                pixels[index] = result.is_vertical ? map_texture.pixels[texture_index] : ColorBrightness(map_texture.pixels[texture_index], -0.2f);
+            if (map_texture != nullptr) {
+                // Update each corresponding pixel within the strip boundary
+                if (top_boundary <= row && row < bottom_boundary) {
+                    int texture_col = (result.is_vertical ? result.end_pos.y - std::floorf(result.end_pos.y) : result.end_pos.x - std::floorf(result.end_pos.x)) * 64;
+                    int texture_row = ((float) (row - top_boundary) / px_strip_height) * 64;
+                    int texture_index = texture_row * 64 + texture_col;
+                    pixels[index] = result.is_vertical ? map_texture->pixels[texture_index] : ColorBrightness(map_texture->pixels[texture_index], -0.2f);
+                }
             }
         }
     }
