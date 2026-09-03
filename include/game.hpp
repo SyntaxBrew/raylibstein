@@ -49,6 +49,7 @@ private:
 
     Image cpu_image;       // image is a cpu-side structure
     Texture2D gpu_texture;   // texture is a gpu-side structure
+    std::unordered_map<int, MapTexture> map_textures;
 
 public:
     Game();

@@ -16,6 +16,11 @@ Game::Game() {
 
     this->cpu_image = GenImageColor(this->window_width, this->window_height, BLACK);
     this->gpu_texture = LoadTextureFromImage(this->cpu_image);
+    this->map_textures = {
+        {1, MapTexture("assets/textures/lobby_wall.png")},
+    };
+
+
     this->focal_length = (this->window_width / 2.0f) / std::tanf(DegreesToRads(this->fov / 2));
 }
 
