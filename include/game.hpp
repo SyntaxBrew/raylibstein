@@ -1,6 +1,8 @@
 #include <iostream>
 #include <numbers>
 #include <vector>
+#include <string>
+#include <unordered_map>
 
 #include "raylib.h"
 
@@ -15,14 +17,25 @@ struct InputState {
     Vector2 mouse_pos;
 };
 
+struct MapTexture {
+    Image image;
+    Color* pixels;
+
+    MapTexture(std::string image_path) {
+        this->image = LoadImage(image_path.c_str());    // load image into CPU memory
+        this->pixels = LoadImageColors(this->image);    // extract pixel data as a color array
+    }
+};
+
 class Game {
 private:
     int window_width = 1280;
     int window_height = 720;
     int cell_2D_length = 16;
-    int ray_offset = 8;
+    int ray_offset = 1;
     float fov = 90;
     float focal_length;
+    bool noclip = false;
 
     Map map = Map(8, 8);
     Player player = {

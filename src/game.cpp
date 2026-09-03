@@ -49,6 +49,8 @@ void Game::ProcessInputs(float dt) {
     this->fov = std::clamp(this->fov * (1 - (0.02f * mouse_wheel_delta)), 1.0f, 179.0f);
     this->focal_length = (this->window_width / 2.0f) / std::tanf(DegreesToRads(this->fov / 2));
     
+    if (IsKeyPressed(KEY_GRAVE)) this->noclip = !this->noclip;
+
     if (IsKeyDown(KEY_LEFT)) this->input_state.turn--;
     if (IsKeyDown(KEY_RIGHT)) this->input_state.turn++;
     if (IsKeyDown(KEY_W)) this->input_state.forward++;
@@ -58,7 +60,6 @@ void Game::ProcessInputs(float dt) {
 }
 
 void Game::Update(float dt) {
-    
     float angle_step = dt * this->input_state.turn;
     float old_dir_x = player.look_dir.x; 
     float old_dir_y = player.look_dir.y;
@@ -82,27 +83,29 @@ void Game::Update(float dt) {
     Vector2 proposed_pos = Vector2Add(player.pos, delta_pos); // candidate pos to test whether it's actually possible to move there first
     Map& map = this->map;
 
-    // Handle horizontal movement, check top and bottom boundaries
-    // If its currently halfway under/above a corner, no horizontal movement occurs
-    for (int y_dir : {-1, 1}) {
-        for (int x_dir: {-1, 1}) {
-            if (map.IsSolid(player.pos.y + player.radius * y_dir, proposed_pos.x + player.radius * x_dir)) {
-                delta_pos.x = 0;
+    if (!this->noclip) {
+        // Handle horizontal movement, check top and bottom boundaries
+        // If its currently halfway under/above a corner, no horizontal movement occurs
+        for (int y_dir : {-1, 1}) {
+            for (int x_dir: {-1, 1}) {
+                if (map.IsSolid(player.pos.y + player.radius * y_dir, proposed_pos.x + player.radius * x_dir)) {
+                    delta_pos.x = 0;
+                }
             }
         }
-    }
 
-    // Handles vertical movement, check left and right boundaries
-    // If its currently halfway to the left/right of a corner, no vertical movement occurs
-    // Prevent corner-clipping to the left/right sides of a wall 
-    for (int y_dir : {-1, 1}) {
-        for (int x_dir : {-1, 1}) {
-            if (map.IsSolid(proposed_pos.y + player.radius * y_dir, player.pos.x + player.radius * x_dir)) {
-                delta_pos.y = 0;
+        // Handles vertical movement, check left and right boundaries
+        // If its currently halfway to the left/right of a corner, no vertical movement occurs
+        // Prevent corner-clipping to the left/right sides of a wall 
+        for (int y_dir : {-1, 1}) {
+            for (int x_dir : {-1, 1}) {
+                if (map.IsSolid(proposed_pos.y + player.radius * y_dir, player.pos.x + player.radius * x_dir)) {
+                    delta_pos.y = 0;
+                }
             }
         }
     }
-  
+    
     player.pos = Vector2Add(player.pos, delta_pos);
 
     this->raycasts.clear();
@@ -142,12 +145,14 @@ void Game::Render() {
         // Multiply height of each strip by the ratio: half-width of actual window / half-width of virtual camera
         // This scales up the entire game (distances) to the proper window size
         float strip_height = (1.0f / perp_dist) * focal_length;
+
         // Snap height to pixelated steps, remove fractional portion, then multiply back 
         int px_strip_height = ((int) std::roundf(strip_height / this->ray_offset)) * this->ray_offset;
 
         int top_boundary = this->window_height / 2 - px_strip_height / 2;
         int bottom_boundary = this->window_height / 2 + px_strip_height / 2;
 
+        // Update each corresponding pixel within the strip boundary
         for (int row = 0; row < this->window_height; row++) {
             if (top_boundary <= row && row < bottom_boundary) {
                 // Convert 2D coordinates to a 1D index
