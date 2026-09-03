@@ -39,7 +39,7 @@ private:
 
     Map map = Map(16, 16);
     Player player = {
-        .pos = {3, 10},
+        .pos = {1.5, 1.5},
         .look_dir = {0, 1},
         .speed = 1,
         .radius = 0.1
