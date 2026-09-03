@@ -20,7 +20,6 @@ Game::Game() {
         {1, MapTexture("assets/textures/lobby_wall.png")},
     };
 
-
     this->focal_length = (this->window_width / 2.0f) / std::tanf(DegreesToRads(this->fov / 2));
 }
 

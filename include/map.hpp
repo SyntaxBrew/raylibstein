@@ -9,6 +9,7 @@ struct RaycastResult {
     Vector2 end_pos;
     bool hit;
     bool is_vertical;
+    int cell_type;
 
     std::string to_str() {
         return std::string("RaycastResult {\n")
@@ -17,7 +18,8 @@ struct RaycastResult {
         + "\tstart_pos" + "(" + std::to_string(this->start_pos.x) + ", " + std::to_string(this->start_pos.y) + ")" + "\n"
         + "\tend_pos" + "(" + std::to_string(this->end_pos.x) + ", " + std::to_string(this->end_pos.y) + ")" + "\n"
         + "\thit: " + (this->hit ? "true" : "false") + "\n"
-        + "\tis_vertical: " + (this->is_vertical ? "true" : "false") + "\n}";
+        + "\tis_vertical: " + (this->is_vertical ? "true" : "false") + "\n"
+        + "\tcell_type: " + std::to_string(this->cell_type) + "\n}";
     }
 };
 

@@ -80,7 +80,8 @@ RaycastResult Map::CastRay(const Vector2& start_pos, const Vector2& dir) {
         start_pos,
         {start_pos.x + dist_travelled * dir.x, start_pos.y + dist_travelled * dir.y},
         hit,
-        is_vertical
+        is_vertical,
+        this->GetCell(row, col)
     };
 }
 
