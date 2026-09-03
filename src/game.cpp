@@ -163,8 +163,20 @@ void Game::Render() {
         int bottom_boundary = this->window_height / 2 + px_strip_height / 2;
         MapTexture& map_texture = this->map_textures.at(result.cell_type);
 
-        // Update each corresponding pixel within the strip boundary
         for (int row = 0; row < this->window_height; row++) {
+            int index = (row * this->window_width) + col;
+
+            // Roof
+            if (row < top_boundary) {
+                pixels[index] = {133, 128, 60, 255};
+            }
+
+            // Floor
+            if (row >= bottom_boundary) {
+                pixels[index] = {113, 98, 33, 255};
+            }
+
+            // Update each corresponding pixel within the strip boundary
             if (top_boundary <= row && row < bottom_boundary) {
                 int texture_col = (result.is_vertical ? result.end_pos.y - (int) result.end_pos.y : result.end_pos.x - (int) result.end_pos.x) * 64;
                 int texture_row = ((float) (row - top_boundary) / px_strip_height) * 64;
@@ -172,8 +184,8 @@ void Game::Render() {
 
                 //max = std::max(texture_col * texture_row, max);
                 // Convert 2D coordinates to a 1D index
-                int index = (row * this->window_width) + col;
-                pixels[index] = map_texture.pixels[texture_index];
+              
+                pixels[index] = result.is_vertical ? map_texture.pixels[texture_index] : ColorBrightness(map_texture.pixels[texture_index], -0.2f);
             }
         }
     }
