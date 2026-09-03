@@ -48,8 +48,8 @@ RaycastResult Map::CastRay(const Vector2& start_pos, const Vector2& dir) {
     float delta_dist_y = std::fabs(1.0 / dir.y); // angled dist between each horizontal line
 
     // we can increment x, y counters instead of re-calculating cell positions
-    int col = (int) start_pos.x;
-    int row = (int) start_pos.y;
+    int col = (int) std::floorf(start_pos.x);
+    int row = (int) std::floorf(start_pos.y);
     int step_x = dir.x == 0 ? 0 : (dir.x > 0 ? 1 : -1); 
     int step_y = dir.y == 0 ? 0 : (dir.y > 0 ? 1 : -1); 
 
