@@ -11,7 +11,7 @@ Vector2 AngleToVector2(float angle) {
 
 Game::Game() {
     InitWindow(this->window_width, this->window_height, "Liminalstein");
-    SetTargetFPS(60);
+    SetTargetFPS(165);
     DisableCursor();
 
     this->cpu_image = GenImageColor(this->window_width, this->window_height, BLACK);
@@ -29,9 +29,10 @@ Game::~Game() {
     UnloadTexture(this->gpu_texture);
 
     for (const auto& [id, map_texture]: this->map_textures) {
-        const auto& [image, pixels] = map_texture;
+        const auto& [image, pixels, dark_pixels] = map_texture;
         UnloadImage(image);
         UnloadImageColors(pixels);
+        UnloadImageColors(dark_pixels);
     }
 }
 
@@ -54,7 +55,7 @@ void Game::ProcessInputs(float dt) {
     this->input_state.mouse_pos = GetMousePosition();
 
     Vector2 mouse_delta = GetMouseDelta();
-    this->input_state.turn += mouse_delta.x * 0.1;
+    this->input_state.turn += mouse_delta.x * 0.2;
 
     float mouse_wheel_delta = GetMouseWheelMove();
     this->fov = std::clamp(this->fov * (1 - (0.02f * mouse_wheel_delta)), 1.0f, 179.0f);
@@ -138,6 +139,15 @@ void Game::Update(float dt) {
     }
 }
 
+Color DarkenColor(const Color& color, float factor) {
+    return {
+        (unsigned char) (color.r * (1-factor)),
+        (unsigned char) (color.g * (1-factor)),
+        (unsigned char) (color.b * (1-factor)),
+        (unsigned char) (color.a)
+    };
+}
+
 void Game::Render() {
     // Extract color pixel data from CPU buffer
     Color* pixels = (Color*) this->cpu_image.data;
@@ -185,10 +195,10 @@ void Game::Render() {
             if (map_texture != nullptr) {
                 // Update each corresponding pixel within the strip boundary
                 if (top_boundary <= row && row < bottom_boundary) {
-                    int texture_col = (result.is_vertical ? result.end_pos.y - std::floorf(result.end_pos.y) : result.end_pos.x - std::floorf(result.end_pos.x)) * 64;
-                    int texture_row = ((float) (row - top_boundary) / px_strip_height) * 64;
-                    int texture_index = texture_row * 64 + texture_col;
-                    pixels[index] = result.is_vertical ? map_texture->pixels[texture_index] : ColorBrightness(map_texture->pixels[texture_index], -0.2f);
+                    int texture_col = (result.is_vertical ? result.end_pos.y - std::floorf(result.end_pos.y) : result.end_pos.x - std::floorf(result.end_pos.x)) * map_texture->image.width;
+                    int texture_row = ((float) (row - top_boundary) / px_strip_height) * map_texture->image.height;
+                    int texture_index = texture_row * map_texture->image.width + texture_col;
+                    pixels[index] = result.is_vertical ? map_texture->pixels[texture_index] : map_texture->dark_pixels[texture_index];
                 }
             }
         }
@@ -204,7 +214,8 @@ void Game::Render() {
     int CELL_SIZE = this->cell_2D_length;
     for (int r = 0; r < this->map.rows; r++) {
         for (int c = 0; c < this->map.cols; c++) {
-            DrawRectangle(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE, map.IsSolid(r, c) ? WHITE : BLACK);
+            int cell_type = map.GetCell(r, c);
+            DrawRectangle(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE, cell_type == 0 ? BLACK : this->map_textures.at(cell_type).pixels[0]);
             // Draw cell outlines
             DrawRectangle((c+1) * CELL_SIZE - 1, r * CELL_SIZE, 2, CELL_SIZE, GRAY);
             DrawRectangle(c * CELL_SIZE, (r+1) * CELL_SIZE - 1, CELL_SIZE, 2, GRAY);
@@ -224,6 +235,8 @@ void Game::Render() {
             RED
         );
     }
+
+    DrawFPS(0, 0);
 
     EndDrawing();
 }

@@ -19,11 +19,16 @@ struct InputState {
 
 struct MapTexture {
     Image image;               // contains metadata and pixel data
-    Color* pixels;          
+    Color* pixels;
+    Color* dark_pixels;          
 
     MapTexture(std::string image_path) {
         this->image = LoadImage(image_path.c_str());    // load image into CPU memory
         this->pixels = LoadImageColors(this->image);    // extract pixel data as a color array
+        this->dark_pixels = LoadImageColors(this->image);
+        for (int i = 0; i < (this->image.width * this->image.height); i++) {
+            this->dark_pixels[i] = ColorBrightness(this->pixels[i], -0.2f);
+        }
     }
 };
 
