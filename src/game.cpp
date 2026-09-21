@@ -1,6 +1,10 @@
 #include "game.hpp"
 #include <algorithm>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
+
 float DegreesToRads(float degrees) {
     return degrees * (std::numbers::pi / 180.0f);
 }
@@ -36,13 +40,23 @@ Game::~Game() {
     }
 }
 
+void HandleFrame(void* arg) {
+    Game* game = static_cast<Game*>(arg);
+
+    float dt = GetFrameTime();
+    game->ProcessInputs(dt);
+    game->Update(dt);
+    game->Render();
+}
+
 void Game::Run() {
-    while (!WindowShouldClose()) {
-        float dt = GetFrameTime();
-        ProcessInputs(dt);
-        Update(dt);
-        Render();
-    }
+    #ifdef __EMSCRIPTEN__
+        emscripten_set_main_loop_arg(HandleFrame, this, 0, 1);
+    #else
+        while (!WindowShouldClose()) {
+            HandleFrame(this);
+        }
+    #endif
 
     CloseWindow();
 }
@@ -69,6 +83,10 @@ void Game::ProcessInputs(float dt) {
     if (IsKeyDown(KEY_S)) this->input_state.forward--;
     if (IsKeyDown(KEY_D)) this->input_state.perp++;
     if (IsKeyDown(KEY_A)) this->input_state.perp--;
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        DisableCursor(); // Enable cursor-locking on HTML page (blocked before any interaction)
+    }
 }
 
 void Game::Update(float dt) {

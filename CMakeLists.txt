@@ -25,3 +25,14 @@ add_executable(Liminalstein
 # PRIVATE = only exposes stuff to your files
 target_include_directories(Liminalstein PRIVATE include) 
 target_link_libraries(Liminalstein PRIVATE raylib)
+
+if (EMSCRIPTEN)
+    set_target_properties(Liminalstein PROPERTIES SUFFIX ".html")
+    target_link_options(Liminalstein PRIVATE
+        "SHELL:-s USE_GLFW=3"
+        "SHELL:-s GL_ENABLE_GET_PROC_ADDRESS=1"
+        "SHELL:-s ALLOW_MEMORY_GROWTH=1"
+        --shell-file ${CMAKE_CURRENT_SOURCE_DIR}/minshell.html
+        --embed-file ${CMAKE_CURRENT_SOURCE_DIR}/assets@assets
+    )
+endif()
