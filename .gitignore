@@ -3,6 +3,7 @@
 build/
 temp/
 docs/devlogs
+docs/
 *.obsidian
 
 docs/project_roadmap_preview.md
